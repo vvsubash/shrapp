@@ -1,0 +1,14 @@
+{
+  "name": "@shrapp/api",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "echo 'build api'",
+    "dev": "echo 'dev api'",
+    "test": "echo 'test api'",
+    "lint": "echo 'lint api'"
+  },
+  "dependencies": {
+    "@shrapp/shared": "workspace:*"
+  }
+}
