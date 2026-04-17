@@ -1,0 +1,20 @@
+.primary {
+  background-color: var(--pink-2);
+  padding: var(--size-1) var(--size-2);
+  border-radius: var(--radius-conditional-2);
+  border: var(--border-size-2) solid var(--pink-4);
+
+  &:focus {
+    border: var(--border-size-2) solid var(--pink-8);
+  }
+}
+.secondary {
+  background-color: var(--green-2);
+  padding: var(--size-1) var(--size-2);
+  border-radius: var(--radius-conditional-2);
+  border: var(--border-size-2) solid var(--green-4);
+
+  &:focus {
+    border: var(--border-size-2) solid var(--green-8);
+  }
+}

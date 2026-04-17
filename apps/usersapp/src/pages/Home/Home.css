@@ -1,0 +1,11 @@
+@layer blocks {
+  .container {
+    border: var(--border-size-3) var(--pink-2) solid;
+    border-radius: var(--radius-conditional-2);
+    margin: var(--size-3);
+    padding: var(--size-1);
+    display: flex;
+    justify-content: space-around;
+    width: 300px;
+  }
+}

@@ -1,2 +1,3 @@
- const addPage = () => <h1>AddPage</h1>
- export default addPage
+export default function Add() {
+  return <h1>AddPage</h1>;
+}
