@@ -1,0 +1,14 @@
+{
+  "name": "@shrapp/root",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "pnpm -r run build",
+    "dev": "pnpm -r --parallel run dev",
+    "test": "pnpm -r run test",
+    "lint": "pnpm -r run lint"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

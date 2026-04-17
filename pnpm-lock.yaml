@@ -1,0 +1,17 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .: {}
+
+  libs/shared: {}
+
+  libs/ui:
+    dependencies:
+      '@shrapp/shared':
+        specifier: workspace:*
+        version: link:../shared
