@@ -1,3 +1,7 @@
+# Wrangler local state and secrets
+.wrangler/
+.dev.vars
+
 # Logs
 *.log
 npm-debug.log*
