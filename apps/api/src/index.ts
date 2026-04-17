@@ -29,8 +29,16 @@ app.route("/", protectedApp);
 
 const port = Number(process.env.PORT) || 8080;
 
-serve({ fetch: app.fetch, port }, () => {
+const server = serve({ fetch: app.fetch, port }, () => {
   console.log(`API server running on port ${port}`);
 });
+
+function shutdown() {
+  console.log("Shutting down…");
+  server.close(() => process.exit(0));
+}
+
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);
 
 export default app;

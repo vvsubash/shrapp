@@ -2,7 +2,10 @@ import { createMiddleware } from "hono/factory";
 import { SessionResponseSchema } from "./types";
 import type { AuthEnv } from "./types";
 
-const AUTH_URL = process.env.AUTH_URL ?? "http://localhost:8787";
+if (!process.env.AUTH_URL) {
+  throw new Error("AUTH_URL environment variable is required");
+}
+const AUTH_URL = process.env.AUTH_URL;
 
 export const authMiddleware = createMiddleware<AuthEnv>(async (c, next) => {
   const cookie = c.req.header("cookie");
