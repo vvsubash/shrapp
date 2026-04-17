@@ -1,0 +1,25 @@
+{
+  "name": "shrapp-auth",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-04-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "AUTH_DB",
+      // For production: replace with real ID from `wrangler d1 create shrapp-auth-db`
+      "database_name": "shrapp-auth-db",
+      "database_id": "local-dev"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "AUTH_KV",
+      // For production: replace with real ID from `wrangler kv namespace create AUTH_KV`
+      "id": "local-dev"
+    }
+  ],
+  "vars": {
+    "BETTER_AUTH_URL": "http://localhost:8787",
+    "TRUSTED_ORIGINS": "http://localhost:5173"
+  }
+}
