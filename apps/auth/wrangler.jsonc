@@ -6,7 +6,7 @@
   "d1_databases": [
     {
       "binding": "AUTH_DB",
-      // For production: replace with real ID from `wrangler d1 create shrapp-auth-db`
+      // Replace with real ID from `wrangler d1 create shrapp-auth-db`
       "database_name": "shrapp-auth-db",
       "database_id": "local-dev"
     }
@@ -14,12 +14,25 @@
   "kv_namespaces": [
     {
       "binding": "AUTH_KV",
-      // For production: replace with real ID from `wrangler kv namespace create AUTH_KV`
+      // Replace with real ID from `wrangler kv namespace create AUTH_KV`
       "id": "local-dev"
     }
   ],
   "vars": {
     "BETTER_AUTH_URL": "http://localhost:8787",
-    "TRUSTED_ORIGINS": "http://localhost:5173"
-  }
+    "TRUSTED_ORIGINS": "http://localhost:5173",
+    "CORS_ORIGINS": "http://localhost:5173,http://localhost:8080"
+  },
+  // Production overrides — uncomment and fill in after creating resources:
+  // "env": {
+  //   "production": {
+  //     "d1_databases": [{ "binding": "AUTH_DB", "database_name": "shrapp-auth-db", "database_id": "<REAL_D1_ID>" }],
+  //     "kv_namespaces": [{ "binding": "AUTH_KV", "id": "<REAL_KV_ID>" }],
+  //     "vars": {
+  //       "BETTER_AUTH_URL": "https://auth.yourdomain.com",
+  //       "TRUSTED_ORIGINS": "https://yourdomain.com",
+  //       "CORS_ORIGINS": "https://yourdomain.com"
+  //     }
+  //   }
+  // }
 }

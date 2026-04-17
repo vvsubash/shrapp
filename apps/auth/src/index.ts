@@ -7,15 +7,15 @@ type AuthApp = { Bindings: Env };
 
 const app = new Hono<AuthApp>();
 
-app.use(
-  "/*",
-  cors({
-    origin: ["http://localhost:5173", "http://localhost:8080"],
+app.use("/*", async (c, next) => {
+  const origins = c.env.CORS_ORIGINS.split(",");
+  return cors({
+    origin: origins,
     allowMethods: ["GET", "POST", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
     credentials: true,
-  })
-);
+  })(c, next);
+});
 
 app.on(["POST", "GET"], "/api/auth/**", async (c) => {
   try {
