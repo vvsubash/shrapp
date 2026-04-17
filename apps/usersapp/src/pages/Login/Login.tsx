@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authClient } from "../../lib/auth-client";
-import { loginSchema, type LoginFormData } from "../../lib/schemas";
+import { authFormSchema, type AuthFormData } from "../../lib/schemas";
 import "./Login.css";
 
 export default function Login() {
@@ -14,20 +14,32 @@ export default function Login() {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<AuthFormData>({
+    resolver: zodResolver(authFormSchema),
   });
 
-  async function onSubmit(data: LoginFormData): Promise<void> {
+  function toggleMode() {
+    setIsSignUp(!isSignUp);
     setServerError("");
+    reset();
+  }
+
+  async function onSubmit(data: AuthFormData): Promise<void> {
+    setServerError("");
+
+    if (isSignUp && !data.email) {
+      setServerError("Email is required for sign up");
+      return;
+    }
 
     try {
       if (isSignUp) {
         const { error } = await authClient.signUp.email({
           username: data.username,
           password: data.password,
-          email: `${data.username}@placeholder.local`,
+          email: data.email!,
           name: data.username,
         });
         if (error) {
@@ -70,6 +82,21 @@ export default function Login() {
           )}
         </label>
 
+        {isSignUp && (
+          <label>
+            Email
+            <input
+              type="email"
+              autoComplete="email"
+              aria-invalid={!!errors.email}
+              {...register("email")}
+            />
+            {errors.email && (
+              <span className="field-error">{errors.email.message}</span>
+            )}
+          </label>
+        )}
+
         <label>
           Password
           <input
@@ -89,7 +116,7 @@ export default function Login() {
 
         <p className="login-toggle">
           {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
-          <button type="button" onClick={() => setIsSignUp(!isSignUp)}>
+          <button type="button" onClick={toggleMode}>
             {isSignUp ? "Sign In" : "Sign Up"}
           </button>
         </p>
