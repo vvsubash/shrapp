@@ -1,6 +1,6 @@
 import { createMiddleware } from "hono/factory";
 import { createRemoteJWKSet, jwtVerify } from "jose";
-import type { AuthEnv } from "./types";
+import type { AuthEnv } from "./types.js";
 
 if (!process.env.AUTH_URL) {
   throw new Error("AUTH_URL environment variable is required");

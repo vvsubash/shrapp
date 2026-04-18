@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { serve } from "@hono/node-server";
-import { authMiddleware } from "./middleware";
-import type { AuthEnv } from "./types";
+import { authMiddleware } from "./middleware.js";
+import type { AuthEnv } from "./types.js";
 
 const app = new Hono();
 
