@@ -23,6 +23,10 @@ protectedApp.get("/api/hello", (c) => {
   return c.json({ message: `Hello, ${user.name}!` });
 });
 
+protectedApp.get("/api/verify", (c) => {
+  return c.json({ status: "OK" });
+});
+
 app.use("/me", authMiddleware);
 app.use("/api/*", authMiddleware);
 app.route("/", protectedApp);

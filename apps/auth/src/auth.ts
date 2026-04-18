@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { username } from "better-auth/plugins";
+import { jwt } from "better-auth/plugins/jwt";
 import { Kysely } from "kysely";
 import { D1Dialect } from "kysely-d1";
 import type { Env, SecondaryStorage } from "./types";
@@ -45,6 +46,7 @@ export function createAuth(env: Env) {
         minUsernameLength: 3,
         maxUsernameLength: 30,
       }),
+      jwt(),
     ],
     secondaryStorage: createKVStorage(env.AUTH_KV),
   });

@@ -13,6 +13,7 @@ app.use("/*", async (c, next) => {
     origin: origins,
     allowMethods: ["GET", "POST", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
+    exposeHeaders: ["set-auth-jwt"],
     credentials: true,
   })(c, next);
 });

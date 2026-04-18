@@ -1,5 +1,5 @@
 import { createMiddleware } from "hono/factory";
-import { SessionResponseSchema } from "./types";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 import type { AuthEnv } from "./types";
 
 if (!process.env.AUTH_URL) {
@@ -7,25 +7,33 @@ if (!process.env.AUTH_URL) {
 }
 const AUTH_URL = process.env.AUTH_URL;
 
+const JWKS = createRemoteJWKSet(
+  new URL(`${AUTH_URL}/api/auth/jwks`)
+);
+
 export const authMiddleware = createMiddleware<AuthEnv>(async (c, next) => {
-  const cookie = c.req.header("cookie");
-  if (!cookie) {
+  const authHeader = c.req.header("authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
     return c.json({ error: "Unauthorized" }, 401);
   }
 
-  const res = await fetch(`${AUTH_URL}/api/auth/get-session`, {
-    headers: { cookie },
-  });
+  const token = authHeader.slice(7);
 
-  if (!res.ok) {
+  try {
+    const { payload } = await jwtVerify(token, JWKS, {
+      issuer: AUTH_URL,
+      audience: AUTH_URL,
+    });
+
+    c.set("user", {
+      id: payload.sub!,
+      name: payload.name as string,
+      username: payload.username as string,
+      email: payload.email as string,
+    });
+
+    await next();
+  } catch {
     return c.json({ error: "Unauthorized" }, 401);
   }
-
-  const parsed = SessionResponseSchema.safeParse(await res.json());
-  if (!parsed.success) {
-    return c.json({ error: "Unauthorized" }, 401);
-  }
-
-  c.set("user", parsed.data.user);
-  await next();
 });
