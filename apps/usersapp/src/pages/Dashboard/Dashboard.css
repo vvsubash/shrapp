@@ -36,4 +36,31 @@
   .dashboard-signout:hover {
     background: var(--gray-8);
   }
+
+  .dashboard-verify {
+    padding: var(--size-2) var(--size-4);
+    background: var(--blue-7);
+    color: white;
+    border: none;
+    border-radius: var(--radius-1);
+    cursor: pointer;
+    margin-bottom: var(--size-3);
+  }
+
+  .dashboard-verify:hover {
+    background: var(--blue-8);
+  }
+
+  .verify-result {
+    font-weight: var(--font-weight-7);
+    margin: 0 0 var(--size-3);
+  }
+
+  .verify-ok {
+    color: var(--green-7);
+  }
+
+  .verify-fail {
+    color: var(--red-7);
+  }
 }
