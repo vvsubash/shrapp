@@ -1,0 +1,47 @@
+name: Deploy to Cloudflare
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-auth:
+    name: Deploy Auth Worker
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/auth
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  deploy-usersapp:
+    name: Deploy Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/usersapp
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+        env:
+          VITE_AUTH_URL: https://shrapp-auth.saveechi.workers.dev
+      - run: pnpm wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
