@@ -118,6 +118,9 @@ importers:
       vite:
         specifier: npm:rolldown-vite@7.1.12
         version: rolldown-vite@7.1.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@22.19.17)(jiti@2.6.1)(tsx@4.21.0)
+      wrangler:
+        specifier: ^4.83.0
+        version: 4.83.0(@cloudflare/workers-types@4.20260417.1)
 
 packages:
 
