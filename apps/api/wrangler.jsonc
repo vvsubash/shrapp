@@ -1,0 +1,26 @@
+{
+  "name": "shrapp-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-04-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "shrapp-db",
+      "database_id": "a6cf1732-97c5-4a82-9959-9d33c9242afe",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "R2",
+      "bucket_name": "shrapp-uploads"
+    }
+  ],
+  "ai": {
+    "binding": "AI"
+  },
+  "vars": {
+    "ALLOWED_ORIGIN": "http://localhost:5173,https://shrapp-web.saveechi.workers.dev"
+  }
+}
