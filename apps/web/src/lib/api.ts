@@ -1,6 +1,9 @@
 import type {
   Employee,
   WorkLocation,
+  Firm,
+  Point,
+  Shift,
   ExtractionResponse,
   CommitRequest,
   CommitResponse,
@@ -63,6 +66,77 @@ export async function createLocation(name: string): Promise<WorkLocation> {
   });
   const data = await handleResponse<{ location: WorkLocation }>(res);
   return data.location;
+}
+
+// --- Firms ---
+export async function fetchFirms(): Promise<Firm[]> {
+  const res = await fetch(`${BASE}/api/firms`);
+  const data = await handleResponse<{ firms: Firm[] }>(res);
+  return data.firms;
+}
+
+export async function createFirm(name: string): Promise<Firm> {
+  const res = await fetch(`${BASE}/api/firms`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name }),
+  });
+  const data = await handleResponse<{ firm: Firm }>(res);
+  return data.firm;
+}
+
+export async function deleteFirm(id: string): Promise<void> {
+  const res = await fetch(`${BASE}/api/firms/${id}`, { method: "DELETE" });
+  if (!res.ok) throw new ApiError(res.status, await res.text());
+}
+
+// --- Points ---
+export async function fetchPoints(firmId: string): Promise<Point[]> {
+  const res = await fetch(`${BASE}/api/firms/${firmId}/points`);
+  const data = await handleResponse<{ points: Point[] }>(res);
+  return data.points;
+}
+
+export async function createPoint(data: {
+  firm_id: string;
+  name: string;
+  parent_point_id?: string | null;
+  shift_duration_hours?: 8 | 12 | null;
+}): Promise<Point> {
+  const res = await fetch(`${BASE}/api/points`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  const result = await handleResponse<{ point: Point }>(res);
+  return result.point;
+}
+
+export async function deletePoint(id: string): Promise<void> {
+  const res = await fetch(`${BASE}/api/points/${id}`, { method: "DELETE" });
+  if (!res.ok) throw new ApiError(res.status, await res.text());
+}
+
+// --- Shifts ---
+export async function fetchShifts(pointId: string): Promise<Shift[]> {
+  const res = await fetch(`${BASE}/api/points/${pointId}/shifts`);
+  const data = await handleResponse<{ shifts: Shift[] }>(res);
+  return data.shifts;
+}
+
+export async function createShift(data: { point_id: string; name: string }): Promise<Shift> {
+  const res = await fetch(`${BASE}/api/shifts`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  const result = await handleResponse<{ shift: Shift }>(res);
+  return result.shift;
+}
+
+export async function deleteShift(id: string): Promise<void> {
+  const res = await fetch(`${BASE}/api/shifts/${id}`, { method: "DELETE" });
+  if (!res.ok) throw new ApiError(res.status, await res.text());
 }
 
 // --- Extraction ---

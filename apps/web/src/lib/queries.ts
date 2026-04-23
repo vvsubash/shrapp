@@ -5,6 +5,15 @@ import {
   deleteEmployee,
   fetchLocations,
   createLocation,
+  fetchFirms,
+  createFirm,
+  deleteFirm,
+  fetchPoints,
+  createPoint,
+  deletePoint,
+  fetchShifts,
+  createShift,
+  deleteShift,
   fetchExtraction,
   commitExtraction,
   extractImage,
@@ -48,6 +57,82 @@ export function useCreateLocation() {
   return useMutation({
     mutationFn: (name: string) => createLocation(name),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["locations"] }),
+  });
+}
+
+// --- Firms ---
+export function useFirms() {
+  return useQuery({
+    queryKey: ["firms"],
+    queryFn: fetchFirms,
+  });
+}
+
+export function useCreateFirm() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (name: string) => createFirm(name),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["firms"] }),
+  });
+}
+
+export function useDeleteFirm() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteFirm(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["firms"] }),
+  });
+}
+
+// --- Points ---
+export function usePoints(firmId: string) {
+  return useQuery({
+    queryKey: ["points", firmId],
+    queryFn: () => fetchPoints(firmId),
+    enabled: !!firmId,
+  });
+}
+
+export function useCreatePoint() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: createPoint,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["points"] }),
+  });
+}
+
+export function useDeletePoint() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deletePoint(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["points"] }),
+  });
+}
+
+// --- Shifts ---
+export function useShifts(pointId: string) {
+  return useQuery({
+    queryKey: ["shifts", pointId],
+    queryFn: () => fetchShifts(pointId),
+    enabled: !!pointId,
+  });
+}
+
+export function useCreateShift() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: createShift,
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ["shifts", vars.point_id] });
+    },
+  });
+}
+
+export function useDeleteShift() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteShift(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["shifts"] }),
   });
 }
 

@@ -93,3 +93,45 @@ export const createEmployeeSchema = z.object({
 export const createLocationSchema = z.object({
   name: z.string().min(1).max(200),
 });
+
+// --- Firms, Points, Shifts ---
+export interface Firm {
+  id: string;
+  name: string;
+  nameNormalized: string;
+  createdAt: string;
+  archivedAt: string | null;
+}
+
+export interface Point {
+  id: string;
+  firmId: string;
+  parentPointId: string | null;
+  name: string;
+  nameNormalized: string;
+  shiftDurationHours: number | null;
+  createdAt: string;
+}
+
+export interface Shift {
+  id: string;
+  pointId: string;
+  name: string;
+  createdAt: string;
+}
+
+export const createFirmSchema = z.object({
+  name: z.string().min(1).max(200),
+});
+
+export const createPointSchema = z.object({
+  firm_id: z.string(),
+  parent_point_id: z.string().nullable().optional(),
+  name: z.string().min(1).max(200),
+  shift_duration_hours: z.union([z.literal(8), z.literal(12)]).nullable().optional(),
+});
+
+export const createShiftSchema = z.object({
+  point_id: z.string(),
+  name: z.string().min(1).max(100),
+});

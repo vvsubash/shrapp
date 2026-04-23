@@ -18,6 +18,31 @@ export const workLocations = sqliteTable("work_locations", {
   createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
 });
 
+export const firms = sqliteTable("firms", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  nameNormalized: text("name_normalized").notNull(),
+  createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
+  archivedAt: text("archived_at"),
+});
+
+export const points = sqliteTable("points", {
+  id: text("id").primaryKey(),
+  firmId: text("firm_id").notNull().references(() => firms.id),
+  parentPointId: text("parent_point_id"), // NULL = nodal point; references points.id
+  name: text("name").notNull(),
+  nameNormalized: text("name_normalized").notNull(),
+  shiftDurationHours: integer("shift_duration_hours"), // 8 or 12, set on nodal points only
+  createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
+});
+
+export const shifts = sqliteTable("shifts", {
+  id: text("id").primaryKey(),
+  pointId: text("point_id").notNull().references(() => points.id),
+  name: text("name").notNull(),
+  createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
+});
+
 export const extractions = sqliteTable("extractions", {
   id: text("id").primaryKey(),
   r2Key: text("r2_key").notNull().unique(),
@@ -40,12 +65,15 @@ export const extractionRows = sqliteTable("extraction_rows", {
   matchedLocationId: text("matched_location_id").references(() => workLocations.id),
   matchConfidence: real("match_confidence"),
   userAction: text("user_action"),
+  matchedPointId: text("matched_point_id").references(() => points.id),
 });
 
 export const attendance = sqliteTable("attendance", {
   id: text("id").primaryKey(),
   employeeId: text("employee_id").notNull().references(() => employees.id),
   locationId: text("location_id").references(() => workLocations.id),
+  pointId: text("point_id").references(() => points.id),
+  shiftId: text("shift_id").references(() => shifts.id),
   workDate: text("work_date").notNull(),
   extractionId: text("extraction_id").references(() => extractions.id),
   createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),

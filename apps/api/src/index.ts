@@ -5,6 +5,9 @@ import { employeeRoutes } from "./routes/employees.js";
 import { locationRoutes } from "./routes/locations.js";
 import { extractRoutes } from "./routes/extract.js";
 import { commitRoutes } from "./routes/commit.js";
+import { firmRoutes } from "./routes/firms.js";
+import { pointRoutes } from "./routes/points.js";
+import { shiftRoutes } from "./routes/shifts.js";
 
 export { ExtractionProcessor } from "./do/extraction-processor.js";
 
@@ -27,5 +30,8 @@ app.route("/api", employeeRoutes);
 app.route("/api", locationRoutes);
 app.route("/api", extractRoutes);
 app.route("/api", commitRoutes);
+app.route("/api", firmRoutes);
+app.route("/api", pointRoutes);
+app.route("/api", shiftRoutes);
 
 export default app;

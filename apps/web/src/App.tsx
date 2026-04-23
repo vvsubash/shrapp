@@ -6,6 +6,7 @@ import { Layout } from "./components/Layout";
 import { UploadPage } from "./pages/UploadPage";
 import { ReviewPage } from "./pages/ReviewPage";
 import { EmployeesPage } from "./pages/EmployeesPage";
+import { FirmsPage } from "./pages/FirmsPage";
 
 export function App() {
   return (
@@ -16,6 +17,7 @@ export function App() {
             <Route index element={<UploadPage />} />
             <Route path="review/:extractionId" element={<ReviewPage />} />
             <Route path="employees" element={<EmployeesPage />} />
+            <Route path="firms" element={<FirmsPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

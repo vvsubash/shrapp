@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from "react-router";
-import { Upload, Users } from "lucide-react";
+import { Upload, Users, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function Layout() {
@@ -37,6 +37,20 @@ export function Layout() {
             >
               <Users className="h-4 w-4" />
               Roster
+            </NavLink>
+            <NavLink
+              to="/firms"
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                )
+              }
+            >
+              <Building2 className="h-4 w-4" />
+              Firms
             </NavLink>
           </nav>
         </div>
