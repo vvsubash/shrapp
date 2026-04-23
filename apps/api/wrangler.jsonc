@@ -31,7 +31,7 @@
   "migrations": [
     {
       "tag": "v1",
-      "new_classes": ["ExtractionProcessor"]
+      "new_sqlite_classes": ["ExtractionProcessor"]
     }
   ],
   "vars": {
