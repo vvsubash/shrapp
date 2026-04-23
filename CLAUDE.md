@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-pnpm workspace monorepo under the `@shrapp` scope. Contains three apps: `usersapp` (React SPA), `auth` (Cloudflare Workers), and `api` (GCP Cloud Run).
+pnpm workspace monorepo under the `@shrapp` scope. Attendance extraction app for construction sites — a site manager photographs a paper register, AI extracts names + work locations, the system matches against an employee roster, and commits confirmed attendance records.
 
 ## Commands
 
@@ -26,74 +26,96 @@ pnpm --filter @shrapp/<name> add -D <dep>
 
 ## Workspace structure
 
-- `pnpm-workspace.yaml` defines `apps/*` as the active workspace glob (`libs/*` and `tools/*` are commented out placeholders).
+- `pnpm-workspace.yaml` defines `apps/*` and `libs/*` as active workspace globs.
 - All packages are scoped under `@shrapp/`.
 - Use `workspace:*` for inter-package dependencies.
 - pnpm only — do not use npm or yarn.
 
+## Architecture
+
+Everything on Cloudflare. Two apps + one shared library:
+- `apps/api` — Hono on Workers (D1, R2, Workers AI bindings)
+- `apps/web` — Vite + React 19 + Tailwind v4 + TanStack Query on Pages
+- `libs/shared` — Zod schemas, TypeScript types, constants (raw TS source exports, no build)
+
+Auth: Cloudflare Access (email OTP, no in-app auth code).
+
 ## Apps
-
-### usersapp
-
-React 19 + TypeScript SPA built with Vite (using `rolldown-vite` as a drop-in replacement via pnpm override). Uses React Router v7 with `BrowserRouter` for client-side routing.
-
-**Key architecture:**
-- `main.tsx` — entry point; wraps `<App />` in `BrowserRouter` + `StrictMode`
-- `App.tsx` — renders `<Routes>` from the route config
-- `router.tsx` — central route definitions as `RouteObject[]`; all routes nest under `RootLayout`
-- `layouts/RootLayout.tsx` — shared layout with nav and `<Outlet />`
-- `pages/` — route page components (some use folder convention like `Home/Home.tsx`, others are flat files)
-- `components/` — shared UI components (e.g. `Button/Button.tsx`)
-- CSS uses [Open Props](https://open-props.style/) design tokens
-
-**Dev commands:**
-```bash
-pnpm --filter usersapp dev      # Vite dev server
-pnpm --filter usersapp build    # tsc -b && vite build
-pnpm --filter usersapp lint     # eslint
-pnpm --filter usersapp preview  # preview production build
-```
-
-Note: the package name in `package.json` is `usersapp` (not `@shrapp/usersapp`), so filter by `usersapp`.
-
-### auth
-
-Hono + better-auth microservice deployed to **Cloudflare Workers**. Uses D1 (SQLite) as primary database and Cloudflare KV as secondary storage (sessions/rate-limiting). Authentication is username/password via better-auth's `username` plugin.
-
-**Key architecture:**
-- `src/index.ts` — Hono app entry; mounts better-auth handler on `/api/auth/**`
-- `src/auth.ts` — `createAuth(env)` factory; configures better-auth with D1 + KV secondary storage + username plugin
-- `src/types.ts` — `Env` bindings interface (D1, KV, secrets)
-- `wrangler.jsonc` — Cloudflare config (D1 + KV bindings, placeholder IDs to replace)
-
-**Setup (one-time):**
-```bash
-cd apps/auth
-wrangler d1 create shrapp-auth-db    # then put database_id in wrangler.jsonc
-wrangler kv namespace create AUTH_KV  # then put id in wrangler.jsonc
-wrangler secret put BETTER_AUTH_SECRET
-```
-
-**Dev commands:**
-```bash
-pnpm --filter @shrapp/auth dev       # wrangler dev (local Workers runtime)
-pnpm --filter @shrapp/auth deploy    # wrangler deploy
-```
-
-**Note:** Cloudflare KV has a 60-second minimum TTL. The secondary storage adapter clamps TTLs accordingly.
 
 ### api
 
-Hono microservice deployed to **GCP Cloud Run** via Docker. Uses `@hono/node-server` for Node.js runtime.
+Hono microservice deployed to **Cloudflare Workers**. Uses D1 (SQLite) with Drizzle ORM, R2 for image storage, and Workers AI for attendance register extraction.
 
 **Key architecture:**
-- `src/index.ts` — Hono app entry; `serve()` on `PORT` env var (default 8080)
-- `Dockerfile` — multi-stage build from workspace root context
+- `src/index.ts` — Hono app entry; mounts route groups under `/api`
+- `src/env.ts` — `Env` bindings interface (D1, R2, AI, ALLOWED_ORIGIN)
+- `src/db/schema.ts` — Drizzle table definitions (employees, work_locations, extractions, extraction_rows, attendance)
+- `src/db/index.ts` — `createDb(d1)` factory
+- `src/routes/` — employees, locations, extract, commit route handlers
+- `src/lib/` — trigram matching, AI prompt builder, name normalization
+- `migrations/` — Drizzle-generated D1 migration SQL files
+
+**API routes:**
+- `GET /api/health` — health check
+- `GET /api/employees` — active roster
+- `POST /api/employees` — create employee
+- `DELETE /api/employees/:id` — soft-delete (archive)
+- `GET /api/locations` — all locations
+- `POST /api/locations` — create location
+- `POST /api/extract` — upload image, run AI extraction + trigram matching
+- `GET /api/extractions/:id` — fetch extraction with rows
+- `POST /api/commit` — commit reviewed rows to attendance (transactional)
 
 **Dev commands:**
 ```bash
-pnpm --filter @shrapp/api dev        # tsx watch (hot-reload)
-pnpm --filter @shrapp/api build      # tsc -b
-pnpm --filter @shrapp/api start      # node dist/index.js
-pnpm --filter @shrapp/api deploy     # gcloud run deploy
+pnpm --filter @shrapp/api dev            # wrangler dev (port 8787)
+pnpm --filter @shrapp/api deploy          # wrangler deploy
+pnpm --filter @shrapp/api generate        # drizzle-kit generate (new migration)
+pnpm --filter @shrapp/api migrate:local   # apply migrations locally
+pnpm --filter @shrapp/api migrate:remote  # apply migrations to production D1
+```
+
+### web
+
+React 19 + TypeScript SPA built with Vite + Tailwind v4. Uses TanStack Query for server state.
+
+**Key architecture:**
+- `src/main.tsx` — entry point
+- `src/App.tsx` — BrowserRouter + QueryClientProvider + routes
+- `src/components/Layout.tsx` — shared layout with nav and `<Outlet />`
+- `src/pages/` — UploadPage, ReviewPage, EmployeesPage
+- `src/lib/api.ts` — typed fetch wrapper for all API calls
+- `src/lib/queries.ts` — TanStack Query hooks
+- `src/lib/image-utils.ts` — client-side image preprocessing (downscale + JPEG)
+- `src/app.css` — Tailwind v4 theme with CSS variables
+
+**Dev commands:**
+```bash
+pnpm --filter @shrapp/web dev      # Vite dev server (port 5173, proxies /api to 8787)
+pnpm --filter @shrapp/web build    # tsc -b && vite build
+pnpm --filter @shrapp/web preview  # preview production build
+pnpm --filter @shrapp/web deploy   # wrangler deploy (Cloudflare Pages)
+```
+
+### shared (libs/shared)
+
+Shared TypeScript library with Zod schemas, types, and constants. No build step — raw `.ts` source exports consumed by Vite and wrangler bundlers.
+
+## Database
+
+D1 (SQLite) with Drizzle ORM. Schema in `apps/api/src/db/schema.ts`, migrations in `apps/api/migrations/`.
+
+**Tables:** employees, work_locations, extractions, extraction_rows, attendance.
+
+**Key constraints:**
+- `UNIQUE(employee_id, work_date)` on attendance — one record per person per day
+- Employees use soft-delete via `archived_at` column
+- `extractions.r2_key` is UNIQUE (SHA-256 of image bytes for idempotent re-upload)
+
+## Cloudflare Setup (one-time)
+
+```bash
+wrangler d1 create shrapp-db          # capture database_id for wrangler.jsonc
+wrangler r2 bucket create shrapp-uploads
+# Cloudflare Access: configure via dashboard
 ```
