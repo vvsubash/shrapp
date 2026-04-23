@@ -20,6 +20,20 @@
   "ai": {
     "binding": "AI"
   },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "EXTRACTION_DO",
+        "class_name": "ExtractionProcessor"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_classes": ["ExtractionProcessor"]
+    }
+  ],
   "vars": {
     "ALLOWED_ORIGIN": "http://localhost:5173,https://shrapp-web.saveechi.workers.dev"
   }

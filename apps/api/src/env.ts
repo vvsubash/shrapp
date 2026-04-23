@@ -3,4 +3,5 @@ export interface Env {
   R2: R2Bucket;
   AI: Ai;
   ALLOWED_ORIGIN: string;
+  EXTRACTION_DO: DurableObjectNamespace;
 }

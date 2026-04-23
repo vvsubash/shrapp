@@ -1,6 +1,6 @@
 import { useReducer, useMemo } from "react";
 import { useParams, useNavigate } from "react-router";
-import { Loader2, Check, Trash2, Plus, AlertCircle } from "lucide-react";
+import { Loader2, Check, Trash2, Plus, AlertCircle, RotateCw } from "lucide-react";
 import { toast } from "sonner";
 import { useExtraction, useEmployees, useLocations, useCommitExtraction, useCreateEmployee, useCreateLocation } from "@/lib/queries";
 import type { ExtractionRow } from "@shrapp/shared";
@@ -160,7 +160,7 @@ export function ReviewPage() {
     }
   };
 
-  if (extractionLoading || !initialized) {
+  if (extractionLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <Loader2 className="mb-4 h-8 w-8 animate-spin text-muted-foreground" />
@@ -173,6 +173,46 @@ export function ReviewPage() {
     return (
       <div className="py-20 text-center text-muted-foreground">
         Extraction not found
+      </div>
+    );
+  }
+
+  if (extraction.status === "processing") {
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <Loader2 className="mb-4 h-10 w-10 animate-spin text-primary" />
+        <p className="text-lg font-medium">AI is reading your register...</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          This usually takes 10-20 seconds. The page will update automatically.
+        </p>
+      </div>
+    );
+  }
+
+  if (extraction.status === "failed") {
+    return (
+      <div className="space-y-4 py-20 text-center">
+        <AlertCircle className="mx-auto h-12 w-12 text-destructive" />
+        <p className="text-lg font-medium">Extraction failed</p>
+        <p className="text-sm text-muted-foreground">
+          {extraction.error_message || "An unexpected error occurred during AI processing."}
+        </p>
+        <button
+          onClick={() => navigate("/")}
+          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+        >
+          <RotateCw className="h-4 w-4" />
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  if (!initialized) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <Loader2 className="mb-4 h-8 w-8 animate-spin text-muted-foreground" />
+        <p className="text-muted-foreground">Loading extraction...</p>
       </div>
     );
   }

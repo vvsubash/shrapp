@@ -24,7 +24,8 @@ export const extractions = sqliteTable("extractions", {
   workDate: text("work_date").notNull(),
   aiModel: text("ai_model").notNull(),
   rawResponse: text("raw_response").notNull(),
-  status: text("status", { enum: ["pending", "committed", "discarded"] }).notNull().default("pending"),
+  status: text("status", { enum: ["processing", "pending", "committed", "discarded", "failed"] }).notNull().default("processing"),
+  errorMessage: text("error_message"),
   createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
   committedAt: text("committed_at"),
 });

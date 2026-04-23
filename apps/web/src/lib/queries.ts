@@ -57,6 +57,8 @@ export function useExtraction(id: string) {
     queryKey: ["extraction", id],
     queryFn: () => fetchExtraction(id),
     enabled: !!id,
+    refetchInterval: (query) =>
+      query.state.data?.status === "processing" ? 2000 : false,
   });
 }
 

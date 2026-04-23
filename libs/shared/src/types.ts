@@ -17,6 +17,9 @@ export const aiResponseSchema = z.object({
 export type AiResponse = z.infer<typeof aiResponseSchema>;
 export type AiResponseRow = z.infer<typeof aiResponseRowSchema>;
 
+// --- Extraction status ---
+export type ExtractionStatus = "processing" | "pending" | "committed" | "discarded" | "failed";
+
 // --- API response: extraction ---
 export interface SuggestedMatch {
   employee_id: string;
@@ -38,8 +41,9 @@ export interface ExtractionRow {
 export interface ExtractionResponse {
   extraction_id: string;
   work_date: string;
-  status: string;
+  status: ExtractionStatus;
   rows: ExtractionRow[];
+  error_message?: string;
 }
 
 // --- API request: commit ---

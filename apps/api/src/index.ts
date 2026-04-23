@@ -6,6 +6,8 @@ import { locationRoutes } from "./routes/locations.js";
 import { extractRoutes } from "./routes/extract.js";
 import { commitRoutes } from "./routes/commit.js";
 
+export { ExtractionProcessor } from "./do/extraction-processor.js";
+
 const app = new Hono<{ Bindings: Env }>();
 
 app.use("/api/*", async (c, next) => {
