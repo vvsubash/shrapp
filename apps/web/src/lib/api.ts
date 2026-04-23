@@ -90,6 +90,19 @@ export async function deleteFirm(id: string): Promise<void> {
   if (!res.ok) throw new ApiError(res.status, await res.text());
 }
 
+export interface BulkImportResult {
+  firms_created: number;
+  points_created: number;
+  shifts_created: number;
+}
+
+export async function bulkImportFirms(file: File): Promise<BulkImportResult> {
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await fetch(`${BASE}/api/firms/bulk`, { method: "POST", body: fd });
+  return handleResponse<BulkImportResult>(res);
+}
+
 // --- Points ---
 export async function fetchPoints(firmId: string): Promise<Point[]> {
   const res = await fetch(`${BASE}/api/firms/${firmId}/points`);

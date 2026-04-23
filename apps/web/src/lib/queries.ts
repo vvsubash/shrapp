@@ -8,6 +8,7 @@ import {
   fetchFirms,
   createFirm,
   deleteFirm,
+  bulkImportFirms,
   fetchPoints,
   createPoint,
   deletePoint,
@@ -81,6 +82,18 @@ export function useDeleteFirm() {
   return useMutation({
     mutationFn: (id: string) => deleteFirm(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["firms"] }),
+  });
+}
+
+export function useBulkImportFirms() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (file: File) => bulkImportFirms(file),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["firms"] });
+      qc.invalidateQueries({ queryKey: ["points"] });
+      qc.invalidateQueries({ queryKey: ["shifts"] });
+    },
   });
 }
 

@@ -1,10 +1,11 @@
-import { useState } from "react";
-import { Plus, Trash2, Loader2, Search, ChevronRight, Building2, MapPin, Clock } from "lucide-react";
+import { useState, useRef } from "react";
+import { Plus, Trash2, Loader2, Search, ChevronRight, Building2, MapPin, Clock, Download, Upload } from "lucide-react";
 import { toast } from "sonner";
 import {
   useFirms,
   useCreateFirm,
   useDeleteFirm,
+  useBulkImportFirms,
   usePoints,
   useCreatePoint,
   useDeletePoint,
@@ -13,10 +14,29 @@ import {
   useDeleteShift,
 } from "@/lib/queries";
 
+const CSV_TEMPLATE = `firm_name,point_name,point_type,parent_point_name,shift_duration_hours,shift_names
+Acme Industries,Main Gate,nodal,,12,Day Shift;Night Shift
+Acme Industries,Parking Lot B,normal,Main Gate,,
+Acme Industries,Warehouse,nodal,,8,Morning;Afternoon;Night
+Beta Corp,Front Entrance,nodal,,12,Day;Night
+`;
+
+function downloadTemplate() {
+  const blob = new Blob([CSV_TEMPLATE], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "firms_template.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export function FirmsPage() {
   const { data: firms, isLoading } = useFirms();
   const createFirmMutation = useCreateFirm();
   const deleteFirmMutation = useDeleteFirm();
+  const bulkImportMutation = useBulkImportFirms();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [newFirmName, setNewFirmName] = useState("");
   const [showAddFirm, setShowAddFirm] = useState(false);
   const [search, setSearch] = useState("");
@@ -33,6 +53,21 @@ export function FirmsPage() {
     } catch {
       toast.error("Failed to add firm");
     }
+  };
+
+  const handleBulkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const result = await bulkImportMutation.mutateAsync(file);
+      toast.success(
+        `Imported ${result.firms_created} firm(s), ${result.points_created} point(s), ${result.shifts_created} shift(s)`,
+      );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Bulk import failed");
+    }
+    // Reset file input so the same file can be re-uploaded
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleDeleteFirm = async (id: string, name: string) => {
@@ -59,13 +94,41 @@ export function FirmsPage() {
             {firms?.length ?? 0} firm{firms?.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <button
-          onClick={() => setShowAddFirm(true)}
-          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-        >
-          <Plus className="h-4 w-4" />
-          Add Firm
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={downloadTemplate}
+            className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent"
+          >
+            <Download className="h-4 w-4" />
+            CSV Template
+          </button>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={bulkImportMutation.isPending}
+            className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent disabled:opacity-50"
+          >
+            {bulkImportMutation.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Upload className="h-4 w-4" />
+            )}
+            Bulk Import
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv"
+            onChange={handleBulkUpload}
+            className="hidden"
+          />
+          <button
+            onClick={() => setShowAddFirm(true)}
+            className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          >
+            <Plus className="h-4 w-4" />
+            Add Firm
+          </button>
+        </div>
       </div>
 
       {showAddFirm && (
